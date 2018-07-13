@@ -3,6 +3,14 @@ function countItems(selector) {
   return document.querySelectorAll(selector).length;
 };
 
+//Рахує кількісь книг
+function countBooks() {
+  var itemsCountLeft = countItems('.left .item');
+  document.getElementById('left-count').innerHTML = 'Ви маєте ' + itemsCountLeft + ' книг!';
+  var itemsCountRight = countItems('.right .item');
+  document.getElementById('right-count').innerHTML = 'Ви обрали ' + itemsCountRight + ' книг!';
+}
+
 function itemsElements(side, stor, i) {
   var itemTitle = document.querySelector('.'+side);
   var newElement = document.createElement('div');
@@ -12,7 +20,7 @@ function itemsElements(side, stor, i) {
   newElement.innerHTML = stor;
   itemTitle.appendChild(newElement);
 }
-
+//Створує щаблонний HTML блок
 function createItem(data, i) {
 
   function createTitle() {
@@ -52,9 +60,8 @@ function readJSONFile(file, callback) {
 
 readJSONFile("/home/dennis/front-end-basic/static/data.json", function(text){
   if (localStorage.length == 0) {
-    //console.log(text);
     var data = JSON.parse(text);
-    //console.log(data);
+
     for (var i = 1; i <= 23; i++) {
       createItem(data, i);
     };
@@ -75,7 +82,6 @@ function addItemToRight(el) {
     newElement.setAttribute('class', 'item');
     newElement.innerHTML = thisItem;
     itemTitle.appendChild(newElement);
-    //console.log(thisItem);
 
     //Створюємо сховище
     localStorage.removeItem('left_task'+last);
@@ -95,7 +101,6 @@ function addItemToRight(el) {
     localStorage.setItem('left_task'+last, thisItem);
 
     document.querySelector('.left .before').classList.replace('before', 'after');
-    //Плюсую індекс для таску в сховищі
   }
 
   //Видаляю вибраний елемент з лівої таблиці
@@ -130,39 +135,38 @@ window.addEventListener('load', function () {
     }
   }
 
-  var itemsCountLeft = countItems('.left .item');
-  document.getElementById('left-count').innerHTML = 'Ви маєте ' + itemsCountLeft + ' книг!';
-  var itemsCountRight = countItems('.right .item');
-  document.getElementById('right-count').innerHTML = 'Ви обрали ' + itemsCountRight + ' книг!';
+  window.addEventListener('click', function () {
+    countBooks();
+  });
+  countBooks();
 });
 
 var input = document.getElementById('authorSearch');
 
-//window.onload = getAuthName('Скотт Линч');
 input.addEventListener('keypress', (e) => {
   if (e.keyCode === 13 && input.value) getAuthName(input.value);
 });
+// Виконує сортування по автору
 function getAuthName(input) {
-  //console.log(input);
   fetch('/home/dennis/front-end-basic/static/data.json')
   .then(function(response) {
     return response.json();
-  }).then(function(j) {
+  }).then(function(res) {
     var authorName = ''
     var itemTitle = document.querySelector('.right');
     itemTitle.innerHTML = '';
     itemTitle = document.querySelector('.left');
     itemTitle.innerHTML = '';
-    for (var key in j){
-      authorName = j[key].author;
+    for (var key in res){
+      authorName = res[key].author;
 
       if (authorName === input) {
-        var newdata = j[key];
+        var newdata = res[key];
         console.log(authorName === input);
         var i = 1;
         sortItems(newdata, i);
         ++i;
-        //console.log(j[key].name);
+
       }
     }
   });
@@ -191,17 +195,8 @@ function sortItems(sortdata, index) {
     itemsElements('left', create(), index)
 }
 
+//Очищає пам'ять та перезаписує її'
 function refresh() {
   localStorage.clear();
-  readJSONFile("/home/dennis/front-end-basics/static/data.json", function(text){
-    if (localStorage.length == 0) {
-      //console.log(text);
-      var data = JSON.parse(text);
-      //console.log(data);
-      for (var i = 1; i <= 23; i++) {
-        createItem(data, i);
-      };
-    }
-  });
   window.location.reload()
 }
